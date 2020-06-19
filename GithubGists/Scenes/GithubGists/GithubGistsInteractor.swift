@@ -9,7 +9,8 @@
 import UIKit
 
 protocol GithubGistsBusinessLogic {
-    func loadGists(request: GithubGists.List.Request)
+    func loadGists()
+    func refreshGists()
 }
 
 protocol GithubGistsDataStore {
@@ -19,15 +20,37 @@ protocol GithubGistsDataStore {
 final class GithubGistsInteractor: GithubGistsBusinessLogic, GithubGistsDataStore {
     
     var presenter: GithubGistsPresentationLogic?
-    //var name: String = ""
+    var worker: ListGistsServicing?
+    var page = 1, totalPages = Constants.totalPages
+    var gists: [Gist] = []
     
-    // MARK: Do something
+    // MARK: - Load Gists
     
-    func loadGists(request: GithubGists.List.Request) {
-        let worker = GithubGistsWorker()
-        worker.fetchGists()
-        
-        let response = GithubGists.List.Response()
-        presenter?.presentGists(response: response)
+    func loadGists() {
+        presenter?.toggleLoading(true)
+        page = page > totalPages ? 1 : page
+        let request = GithubGists.List.Request(page: page)
+        worker = worker ?? GithubGistsWorker()
+        worker?.fetchGists(request: request, completion: { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let gists):
+                self.page += 1
+                self.gists += gists
+                let response = GithubGists.List.Response(gists: self.gists)
+                self.presenter?.presentGists(response: response)
+                self.presenter?.toggleLoading(false)
+            case .failure(let error):
+                print(error.localizedDescription)
+                self.presenter?.presentError(title: "Ops!", message: error.localizedDescription)
+                self.presenter?.toggleLoading(false)
+            }
+        })
+    }
+    
+    func refreshGists() {
+        page = 1
+        gists = []
+        loadGists()
     }
 }

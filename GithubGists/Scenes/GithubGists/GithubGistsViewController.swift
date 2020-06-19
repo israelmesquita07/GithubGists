@@ -9,13 +9,16 @@
 import UIKit
 
 protocol GithubGistsDisplayLogic: class {
-    func displaySomething(viewModel: GithubGists.List.ViewModel)
+    func displayGists(viewModel: GithubGists.List.ViewModel)
+    func displayError(title: String, message: String)
+    func toggleLoading(_ bool: Bool)
 }
 
-final class GithubGistsViewController: UIViewController, GithubGistsDisplayLogic {
+final class GithubGistsViewController: UIViewController {
     
     var interactor: GithubGistsBusinessLogic?
     var router: (NSObjectProtocol & GithubGistsRoutingLogic & GithubGistsDataPassing)?
+    lazy var viewScreen = GithubGistsViewScreen(delegate: self)
     
     // MARK: - Object lifecycle
     
@@ -47,17 +50,81 @@ final class GithubGistsViewController: UIViewController, GithubGistsDisplayLogic
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureView()
+
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         loadGists()
+    }
+    
+    // MARK: - Setup View
+
+    private func configureView() {
+        title = "Swift Repositories"
+        view.backgroundColor = .white
+        navigationController?.navigationBar.prefersLargeTitles = true
+        setupViewScreen()
+    }
+    
+    private func setupViewScreen() {
+        viewScreen.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(viewScreen)
+        NSLayoutConstraint.activate([
+            viewScreen.topAnchor.constraint(equalTo: view.topAnchor),
+            viewScreen.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            viewScreen.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            viewScreen.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
     
     // MARK: - Load Gists
     
     func loadGists() {
-        let request = GithubGists.List.Request()
-        interactor?.loadGists(request: request)
+        interactor?.loadGists()
+    }
+   
+    // MARK: - Show Message
+
+    private func showMessage(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
+}
+
+
+//MARK: - GithubGistsDisplayLogic
+extension GithubGistsViewController: GithubGistsDisplayLogic {
+    func displayGists(viewModel: GithubGists.List.ViewModel) {
+        viewScreen.gists = viewModel.gists
     }
     
-    func displaySomething(viewModel: GithubGists.List.ViewModel) {
+    func displayError(title: String, message: String) {
+        showMessage(title: title, message: message)
+    }
+    
+    func toggleLoading(_ bool: Bool) {
+        if bool {
+            viewScreen.startLoading()
+            return
+        }
+        viewScreen.stopLoading()
+    }
+}
 
+//MARK: - ViewScreenDelegating
+extension GithubGistsViewController: ViewScreenDelegating {
+    func notifyTableViewEnds() {
+        loadGists()
+    }
+    
+    func refreshGists() {
+        interactor?.refreshGists()
+    }
+    
+    func didSelectRowAt(gistsId: String) {
+        
     }
 }

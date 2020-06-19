@@ -14,15 +14,15 @@ enum GithubGists {
     enum List {
         
         struct Request {
-            
+            let page: Int
         }
         
         struct Response {
-            
+            let gists: [Gist]
         }
         
         struct ViewModel {
-            
+            let gists: [Gist]
         }
     }
 }

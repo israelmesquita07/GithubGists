@@ -13,7 +13,7 @@ protocol FetchGistDetailsServicing {
     func fetchGistImage(url: String, completion: @escaping(Result<UIImage,RepositoryError>) -> Void)
 }
 
-class GithubGistDetailsWorker: FetchGistDetailsServicing {
+final class GithubGistDetailsWorker: FetchGistDetailsServicing {
     
     func fetchGistDetails(request: GithubGistDetails.Details.Request, completion: @escaping(Result<Gist,RepositoryError>) -> Void) {
         guard let url = URL(string: "\(Endpoints.baseUrl)\(request.id)") else {

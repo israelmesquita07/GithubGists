@@ -14,7 +14,7 @@ protocol GithubGistDetailsPresentationLogic {
     func toggleLoading(_ bool: Bool)
 }
 
-class GithubGistDetailsPresenter: GithubGistDetailsPresentationLogic {
+final class GithubGistDetailsPresenter: GithubGistDetailsPresentationLogic {
     
     weak var viewController: GithubGistDetailsDisplayLogic?
     

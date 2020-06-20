@@ -17,7 +17,7 @@ protocol GithubGistDetailsDataStore {
     var description: String? { get set }
 }
 
-class GithubGistDetailsInteractor: GithubGistDetailsBusinessLogic, GithubGistDetailsDataStore {
+final class GithubGistDetailsInteractor: GithubGistDetailsBusinessLogic, GithubGistDetailsDataStore {
     
     var presenter: GithubGistDetailsPresentationLogic?
     var worker: FetchGistDetailsServicing?

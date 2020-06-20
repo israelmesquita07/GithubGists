@@ -14,7 +14,7 @@ protocol GithubGistDetailsDisplayLogic: class {
     func toggleLoading(_ bool: Bool)
 }
 
-class GithubGistDetailsViewController: UIViewController {
+final class GithubGistDetailsViewController: UIViewController {
     
     var interactor: GithubGistDetailsBusinessLogic?
     var router: (NSObjectProtocol & GithubGistDetailsDataPassing)?

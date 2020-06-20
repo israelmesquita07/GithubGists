@@ -9,25 +9,63 @@
 import UIKit
 
 protocol GithubGistDetailsBusinessLogic {
-    func doSomething(request: GithubGistDetails.Something.Request)
+    func loadGistDetails()
 }
 
 protocol GithubGistDetailsDataStore {
-    //var name: String { get set }
+    var gistId: String? { get set }
+    var description: String? { get set }
 }
 
 class GithubGistDetailsInteractor: GithubGistDetailsBusinessLogic, GithubGistDetailsDataStore {
     
     var presenter: GithubGistDetailsPresentationLogic?
-    //var name: String = ""
+    var worker: FetchGistDetailsServicing?
+    var gistId: String?
+    var description: String?
     
-    // MARK: Do something
+    // MARK: - Load Gist Details
     
-    func doSomething(request: GithubGistDetails.Something.Request) {
-        let worker = GithubGistDetailsWorker()
-        worker.doSomeWork()
-        
-        let response = GithubGistDetails.Something.Response()
-        presenter?.presentSomething(response: response)
+    func loadGistDetails() {
+        self.presenter?.toggleLoading(true)
+        guard let gistId = gistId, !gistId.isEmpty else {
+            self.presenter?.presentError(title: "Ops!", message: "Ocorreu um erro")
+            self.presenter?.toggleLoading(false)
+            return
+        }
+        let request = GithubGistDetails.Details.Request(id: gistId)
+        worker = worker ?? GithubGistDetailsWorker()
+        worker?.fetchGistDetails(request: request, completion: { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let gist):
+                self.loadGistImage(gist)
+            case .failure(let error):
+                self.presenter?.presentError(title: "Ops!", message: error.localizedDescription)
+                self.presenter?.toggleLoading(false)
+            }
+        })
+    }
+    
+    private func loadGistImage(_ gist: Gist) {
+        guard let owner = gist.owner, let description = description else {
+            presenter?.presentError(title: "Ops!", message: "Ocorreu um erro!")
+            presenter?.toggleLoading(false)
+            return
+        }
+        worker = worker ?? GithubGistDetailsWorker()
+        worker?.fetchGistImage(url: owner.avatarUrl) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let image):
+                let gistDetails = Gist(id: gist.id, description: description, owner: gist.owner)
+                let response = GithubGistDetails.Details.Response(gist: gistDetails, gistImage: image)
+                self.presenter?.presentGistDetails(response: response)
+                self.presenter?.toggleLoading(false)
+            case .failure(let error):
+                self.presenter?.presentError(title: "Ops!", message: error.localizedDescription)
+                self.presenter?.toggleLoading(false)
+            }
+        }
     }
 }

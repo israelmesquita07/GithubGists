@@ -9,7 +9,7 @@
 import UIKit
 
 protocol ViewScreenDelegating: AnyObject {
-    func didSelectRowAt(gistsId: String)
+    func didSelectRowAt(gistsId: String, description: String)
     func notifyTableViewEnds()
     func refreshGists()
 }
@@ -50,6 +50,7 @@ final class GithubGistsViewScreen: UIView {
         tableView.rowHeight = 120.0
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(GithubGistsTableViewCell.self, forCellReuseIdentifier: String(describing: GithubGistsTableViewCell.self))
+        tableView.tableFooterView = UIView()
         return tableView
     }()
     
@@ -114,8 +115,9 @@ extension GithubGistsViewScreen: UITableViewDataSource {
             return UITableViewCell()
         }
         let gist = gists[indexPath.row]
-        cell.setupCell(gist)
-        cell.selectionStyle = .none
+        if let owner = gist.owner {
+            cell.setupCell(owner)
+        }
         return cell
     }
 }
@@ -124,10 +126,10 @@ extension GithubGistsViewScreen: UITableViewDataSource {
 extension GithubGistsViewScreen: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let gist = gists[indexPath.row]
-        delegate?.didSelectRowAt(gistsId: gist.id)
+        delegate?.didSelectRowAt(gistsId: gist.id ?? "", description: gist.description ?? "")
     }
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row == gists.count - 2 {
+        if indexPath.row == gists.count - 2 && !activityIndicator.isAnimating {
             delegate?.notifyTableViewEnds()
         }
     }

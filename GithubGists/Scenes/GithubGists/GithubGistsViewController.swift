@@ -51,20 +51,19 @@ final class GithubGistsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
-
+        loadGists()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        loadGists()
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
     
     // MARK: - Setup View
 
     private func configureView() {
-        title = "Swift Repositories"
+        title = "Gists Repositories"
         view.backgroundColor = .white
-        navigationController?.navigationBar.prefersLargeTitles = true
         setupViewScreen()
     }
     
@@ -124,7 +123,8 @@ extension GithubGistsViewController: ViewScreenDelegating {
         interactor?.refreshGists()
     }
     
-    func didSelectRowAt(gistsId: String) {
-        
+    func didSelectRowAt(gistsId: String, description: String) {
+        interactor?.fillGistToDetails(gistId: gistsId, description: description)
+        router?.routeToDetails()
     }
 }

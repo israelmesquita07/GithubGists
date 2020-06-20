@@ -11,10 +11,12 @@ import UIKit
 protocol GithubGistsBusinessLogic {
     func loadGists()
     func refreshGists()
+    func fillGistToDetails(gistId: String, description: String)
 }
 
 protocol GithubGistsDataStore {
-    //var name: String { get set }
+    var gistId: String { get set }
+    var description: String { get set }
 }
 
 final class GithubGistsInteractor: GithubGistsBusinessLogic, GithubGistsDataStore {
@@ -23,6 +25,7 @@ final class GithubGistsInteractor: GithubGistsBusinessLogic, GithubGistsDataStor
     var worker: ListGistsServicing?
     var page = 1, totalPages = Constants.totalPages
     var gists: [Gist] = []
+    var gistId = "", description = ""
     
     // MARK: - Load Gists
     
@@ -52,5 +55,10 @@ final class GithubGistsInteractor: GithubGistsBusinessLogic, GithubGistsDataStor
         page = 1
         gists = []
         loadGists()
+    }
+    
+    func fillGistToDetails(gistId: String, description: String) {
+        self.gistId = gistId
+        self.description = !description.isEmpty ? description : "No description"
     }
 }

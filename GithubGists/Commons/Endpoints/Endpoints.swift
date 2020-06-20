@@ -12,6 +12,6 @@ import Foundation
 // Endpoint Detalhes https://api.github.com/gists/:id
 
 struct Endpoints {
-    static let baseUrl = "https://api.github.com/gists"
-    static let publicGists = "\(Endpoints.baseUrl)/public?page="
+    static let baseUrl = "https://api.github.com/gists/"
+    static let publicGists = "\(Endpoints.baseUrl)public?page="
 }

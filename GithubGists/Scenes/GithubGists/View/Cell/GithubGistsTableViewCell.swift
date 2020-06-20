@@ -24,7 +24,7 @@ final class GithubGistsTableViewCell: UITableViewCell {
     private lazy var repositoryLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
-        label.font = UIFont.systemFont(ofSize: 18.0, weight: .semibold)
+        label.font = UIFont.systemFont(ofSize: 22.0, weight: .semibold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -45,6 +45,7 @@ final class GithubGistsTableViewCell: UITableViewCell {
         contentView.addSubview(repositoryImageView)
         contentView.addSubview(repositoryLabel)
         setupConstraints()
+        self.selectionStyle = .none
     }
     
     private func setupConstraints() {
@@ -67,9 +68,9 @@ final class GithubGistsTableViewCell: UITableViewCell {
         repositoryImageView.image = nil
     }
     
-    func setupCell(_ gist: Gist) {
-        repositoryLabel.text = gist.owner.login
-        guard let urlImage = URL(string: gist.owner.avatarUrl) else { return }
+    func setupCell(_ owner: Owner) {
+        repositoryLabel.text = owner.login
+        guard let urlImage = URL(string: owner.avatarUrl) else { return }
         task = URLSession.shared.dataTask(with: urlImage, completionHandler: { (data, _, error) in
             if error == nil, let data = data {
                 let image = UIImage(data: data)
